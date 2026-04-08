@@ -1,42 +1,5 @@
 const apiKey = "AIzaSyDSR4lubkBGGr-gBHicZlNGy0S4d26ucC8"
 
-// Como utilizar:
-// Adicione a função principal em um arquivo de screen:
-
-//   //hooks de controle e pesquisa:
-//   const [books, setBooks] = useState<any[]>([]);
-//   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-//   const [query, setQuery] = useState<string>("");
-
-//   // função que chama a pesquisa:
-//   const handleSearch = (text: string) => {
-//     setQuery(text);
-//     if (text.trim().length > 0) {
-//       loadBooks(text, setBooks, setErrorMsg);
-//     } else {
-//       clearSearch();
-//     }
-//   };
-//   // função que limpa a pesquisa, a array de livros e a mensagem de erro:
-//   const clearSearch = () => {
-//     setQuery("");
-//     setBooks([]);
-//     setErrorMsg(null);
-//   };
-
-//books é a array que guarda todos os resultados das pesquisas, seguindo por indice, as informações
-//estarão em volumeInfo ("boocks[index].volumeInfo" vamos chamar de "book")
-
-// book.imageLinks.smallThumbnail = capa pequena
-// book.imageLinks.thumbnail = capa grande
-// book.authors = autor
-// book.publisher = editora
-// book.publishedDate = data de publicação
-// book.description = descrição
-// book.pageCount = quantidade de paginas
-// book.industryIdentifiers[0].identifier = isbn_13
-// book.industryIdentifiers[1].identifier = isbn_10
-
 async function fetchBooks(query: string) {
   try {
     let searchParam = query.trim();
