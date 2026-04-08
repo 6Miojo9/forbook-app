@@ -11,10 +11,33 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Image,
+  FlatList,
 } from "react-native";
+import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { loadBooks } from "@/src/utils/loadBooks";
 
 export default function SearchScreen() {
+  const [books, setBooks] = useState<any[]>([]);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [query, setQuery] = useState<string>("");
+
+  const handleSearch = (text: string) => {
+    setQuery(text);
+    if (text.trim().length > 0) {
+      loadBooks(text, setBooks, setErrorMsg);
+    } else {
+      clearSearch();
+    }
+  };
+
+  const clearSearch = () => {
+    setQuery("");
+    setBooks([]);
+    setErrorMsg(null);
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.headerWrapper}>
@@ -46,6 +69,8 @@ export default function SearchScreen() {
               keyboardType="default"
               placeholderTextColor="#6C63FF"
               placeholder="Buscar Livros"
+              value={query}
+              onChangeText={handleSearch}
             />
           </View>
           <View>
@@ -78,9 +103,30 @@ export default function SearchScreen() {
       </View>
 
       <View style={styles.resultsMain}>
-        <Text style={styles.textResults}>
-          $cardCount resultados encontrados
-        </Text>
+        {errorMsg && <Text style={styles.error}>{errorMsg}</Text>}
+        <FlatList
+          data={books}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => {
+            const book = item.volumeInfo;
+            return (
+              <View style={styles.bookItem}>
+                {book.imageLinks?.thumbnail && (
+                  <Image
+                    source={{ uri: book.imageLinks.thumbnail }}
+                    style={styles.thumbnail}
+                  />
+                )}
+                <View style={styles.info}>
+                  <Text style={styles.titlebook}>{book.title}</Text>
+                  <Text style={styles.author}>{book.authors?.join(", ")}</Text>
+                  <Text style={styles.publisher}>{book.publisher}</Text>
+                  <Text style={styles.date}>{book.publishedDate}</Text>
+                </View>
+              </View>
+            );
+          }}
+        />
       </View>
     </SafeAreaView>
   );
@@ -193,4 +239,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  error: { color: "red", marginBottom: 12 },
+  bookItem: { flexDirection: "row", marginBottom: 16 },
+  thumbnail: { width: 80, height: 120, marginRight: 12 },
+  info: { flex: 1 },
+  titlebook: { fontWeight: "bold", fontSize: 16 },
+  author: { fontStyle: "italic", color: "#555" },
+  publisher: { color: "#777" },
+  date: { color: "#999" },
 });
