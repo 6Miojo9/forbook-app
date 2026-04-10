@@ -15,6 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import BarcodeScannerModal from "@/src/components/barcodeScannerModal";
 import { useTransition } from "@/src/context/transition-context";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { loadBooks } from "@/src/utils/loadBooks";
 
 export default function Modal() {
   const { overlayRef } = useTransition();
@@ -27,6 +28,36 @@ export default function Modal() {
   const [price, setPrice] = useState("");
   const [condition, setCondition] = useState("");
   const [scannerVisible, setScannerVisible] = useState(false);
+  const [books, setBooks] = useState<any[]>([]);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [query, setQuery] = useState<string>("");
+
+  const [inputsEnabled, setInputsEnabled] = useState("");
+
+  const handleSearch = (text: string) => {
+    setQuery(text);
+    if (text.trim().length > 0) {
+      loadBooks(text, "1", setBooks, setErrorMsg);
+    } else {
+      clearSearch();
+      setInputsEnabled("auto");
+    }
+  };
+
+  const clearSearch = () => {
+    setQuery("");
+    setBooks([]);
+    setErrorMsg(null);
+  };
+
+  useEffect(() => {
+    if (books.length > 0) {
+      setTitle(books[0].volumeInfo.title || "");
+      setAuthor(books[0].volumeInfo.authors?.join(", ") || "");
+      setSynopsis(books[0].volumeInfo.description || "");
+      setInputsEnabled("none");
+    }
+  }, [books]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", (e) => {
@@ -80,6 +111,7 @@ export default function Modal() {
             </TouchableOpacity>
           </View>
 
+          {/* ISBN */}
           <View style={styles.inputContainer}>
             <Text style={styles.floatingLabel}>ISBN</Text>
             <View style={styles.inputWithIcon}>
@@ -88,8 +120,9 @@ export default function Modal() {
                 placeholder="Ex: 978-85-359..."
                 placeholderTextColor="#a6a8aa"
                 keyboardType="numeric"
-                value={isbn}
-                onChangeText={setIsbn}
+                value={query}
+                onChangeText={setQuery}
+                onSubmitEditing={(event) => {handleSearch(query);}}
               />
               <TouchableOpacity
                 style={styles.iconScan}
@@ -106,9 +139,9 @@ export default function Modal() {
           </View>
 
           {/* Título */}
-          <View style={styles.inputContainer}>
+          <View style={styles.inputContainer} pointerEvents={inputsEnabled ? "auto" : "none"}>
             <Text style={styles.floatingLabel}>Título do Livro</Text>
-            <TextInput
+            <TextInput pointerEvents={inputsEnabled ? "auto" : "none"}
               style={styles.input}
               placeholder="Ex: O Senhor dos Anéis"
               placeholderTextColor="#a6a8aa"
@@ -118,7 +151,7 @@ export default function Modal() {
           </View>
 
           {/* Autor */}
-          <View style={styles.inputContainer}>
+          <View style={styles.inputContainer} pointerEvents={inputsEnabled ? "auto" : "none"}>
             <Text style={styles.floatingLabel}>Autor(a)</Text>
             <TextInput
               style={styles.input}
@@ -130,7 +163,7 @@ export default function Modal() {
           </View>
 
           {/* Sinopse */}
-          <View style={styles.inputContainer}>
+          <View style={styles.inputContainer} pointerEvents={inputsEnabled ? "auto" : "none"}>
             <Text style={styles.floatingLabel}>Sinopse / Observações</Text>
             <TextInput
               style={[styles.input, styles.textArea]}

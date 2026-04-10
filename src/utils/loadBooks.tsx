@@ -1,4 +1,6 @@
-const apiKey = "AIzaSyDSR4lubkBGGr-gBHicZlNGy0S4d26ucC8"
+import { apiKey } from "./apiKey.json";
+const URL = "https://www.googleapis.com/books/v1/volumes?q=";
+
 
 // Como utilizar:
 // Adicione a função principal em um arquivo de screen:
@@ -37,21 +39,28 @@ const apiKey = "AIzaSyDSR4lubkBGGr-gBHicZlNGy0S4d26ucC8"
 // book.industryIdentifiers[0].identifier = isbn_13
 // book.industryIdentifiers[1].identifier = isbn_10
 
-async function fetchBooks(query: string) {
+async function fetchBooks(query: string, quant: string) {
+  let url;
+
   try {
     let searchParam = query.trim();
 
     if (/^\d+$/.test(searchParam)) {
       searchParam = `isbn:${searchParam}`;
     }
-    else if (searchParam.toLowerCase().startsWith("autor:")) {
-      const autor = searchParam.replace(/autor:/i, "").trim();
-      searchParam = `inauthor:${autor}`;
+
+    
+
+    if (quant == "0"){
+      url = `${URL}${encodeURIComponent(searchParam)}${apiKey}&langRestrict=pt`
+    } else {
+      url = `${URL}${encodeURIComponent(searchParam)}${apiKey}&maxResults=${quant}&langRestrict=pt`
     }
 
-    const response = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(searchParam)}&key=${apiKey}`
-    );
+    console.log(url);
+    
+
+    const response = await fetch(`${url}`);
 
     if (!response.ok) {
       throw new Error(`Erro na requisição: ${response.status}`);
@@ -68,14 +77,16 @@ async function fetchBooks(query: string) {
 
 export async function loadBooks(
   query: string,
+  quant: string,
   setBooks: React.Dispatch<React.SetStateAction<any[]>>,
   setErrorMsg: React.Dispatch<React.SetStateAction<string | null>>
 ): Promise<void> {
-  const results = await fetchBooks(query);
+  const results = await fetchBooks(query, quant);
   if (results.length === 0) {
     setErrorMsg("Não foi possível carregar os livros.");
   }
   setBooks(results);
   console.log(results);
+  
 };
 

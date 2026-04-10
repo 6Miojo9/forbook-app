@@ -12,9 +12,9 @@ import {
   TouchableOpacity,
   View,
   Image,
-  FlatList,
+  FlatList
 } from "react-native";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { loadBooks } from "@/src/utils/loadBooks";
 
@@ -23,10 +23,12 @@ export default function SearchScreen() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [query, setQuery] = useState<string>("");
 
+  const flatListRef = useRef<FlatList<any>>(null);
+
   const handleSearch = (text: string) => {
     setQuery(text);
     if (text.trim().length > 0) {
-      loadBooks(text, setBooks, setErrorMsg);
+      loadBooks(text, "0", setBooks, setErrorMsg);
     } else {
       clearSearch();
     }
@@ -105,6 +107,7 @@ export default function SearchScreen() {
       <View style={styles.resultsMain}>
         {errorMsg && <Text style={styles.error}>{errorMsg}</Text>}
         <FlatList
+          ref={flatListRef}
           data={books}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => {
@@ -120,8 +123,7 @@ export default function SearchScreen() {
                 <View style={styles.info}>
                   <Text style={styles.titlebook}>{book.title}</Text>
                   <Text style={styles.author}>{book.authors?.join(", ")}</Text>
-                  <Text style={styles.publisher}>{book.publisher}</Text>
-                  <Text style={styles.date}>{book.publishedDate}</Text>
+                  <Text style={styles.publisher}>Quant: 0</Text>
                 </View>
               </View>
             );
@@ -204,7 +206,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     justifyContent: "space-around",
   },
-
   tabSeparator: {
     width: 1,
     height: 18,
@@ -224,16 +225,12 @@ const styles = StyleSheet.create({
   },
   resultsMain: {
     margin: 20,
-  },
-  textResults: {
-    fontFamily: "montserratRegular",
-    fontSize: 14,
-    color: "#a6a8aa",
+    flex: 1,
   },
   userLogo: {
     borderWidth: 2,
     borderColor: "#6c63ff",
-    borderRadius: 20, // opcional - para arredondar as bordas
+    borderRadius: 20,
     width: 40,
     height: 40,
     justifyContent: "center",
@@ -246,5 +243,4 @@ const styles = StyleSheet.create({
   titlebook: { fontWeight: "bold", fontSize: 16 },
   author: { fontStyle: "italic", color: "#555" },
   publisher: { color: "#777" },
-  date: { color: "#999" },
 });

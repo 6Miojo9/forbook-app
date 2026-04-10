@@ -45,3 +45,6 @@ app-example
 #vscode config folder
 
 .vscode/
+
+# apiKey
+src/utils/apiKey.json
